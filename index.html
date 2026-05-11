@@ -1786,6 +1786,51 @@ function App() {
     setCur(null);
     showToast("Client removed");
   }
+  function exportData() {
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      clients: clients,
+      weeklyData: {}
+    };
+    clients.forEach(c => {
+      const d = allData[c.id];
+      if (d && Object.keys(d).length) backup.weeklyData[c.id] = d;
+    });
+    const json = JSON.stringify(backup, null, 2);
+    const blob = new Blob([json], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'path52-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Backup saved ✓");
+  }
+  async function importData(file) {
+    try {
+      const text = await file.text();
+      const backup = JSON.parse(text);
+      if (!backup.clients || !Array.isArray(backup.clients)) throw new Error("Invalid backup file");
+      setClients(backup.clients);
+      await store.set("p52_clients", backup.clients);
+      if (backup.weeklyData) {
+        const newAllData = {
+          ...allData
+        };
+        for (const [id, data] of Object.entries(backup.weeklyData)) {
+          newAllData[id] = data;
+          await store.set("p52_" + id, data);
+        }
+        setAllData(newAllData);
+      }
+      showToast("Backup restored — " + backup.clients.length + " client" + (backup.clients.length !== 1 ? "s" : "") + " loaded ✓");
+    } catch (e) {
+      alert("Could not restore backup: " + e.message);
+    }
+  }
   async function fetchPendingCheckins(clientList) {
     const url = localStorage.getItem('p52_sb_url');
     const key = localStorage.getItem('p52_sb_key');
@@ -2342,6 +2387,63 @@ function App() {
       lineHeight: 1.6
     }
   }), React.createElement("div", {
+    style: {
+      height: 1,
+      background: "#252525",
+      margin: "4px 0 16px"
+    }
+  }), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#5271FF",
+      textTransform: "uppercase",
+      letterSpacing: "0.07em",
+      marginBottom: 10
+    }
+  }, "Data Backup"), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      marginBottom: 20
+    }
+  }, React.createElement("button", {
+    onClick: () => {
+      setShowSbModal(false);
+      exportData();
+    },
+    style: {
+      ...btnS,
+      flex: 1,
+      padding: 12,
+      fontSize: 14
+    }
+  }, "\u2B07 Export Backup"), React.createElement("label", {
+    style: {
+      ...btnS,
+      flex: 1,
+      padding: 12,
+      fontSize: 14,
+      textAlign: "center",
+      cursor: "pointer",
+      borderRadius: 14,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, "\u2B06 Import Backup", React.createElement("input", {
+    type: "file",
+    accept: ".json",
+    style: {
+      display: "none"
+    },
+    onChange: e => {
+      if (e.target.files[0]) {
+        setShowSbModal(false);
+        importData(e.target.files[0]);
+      }
+    }
+  }))), React.createElement("div", {
     style: {
       display: "flex",
       gap: 10
