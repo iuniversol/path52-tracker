@@ -1644,13 +1644,6 @@ function App() {
   const [apiKey, setApiKey] = useState('');
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [keyInput, setKeyInput] = useState('');
-  const [sbUrl, setSbUrl] = useState('');
-  const [sbKey, setSbKey] = useState('');
-  const [weekMsg, setWeekMsg] = useState('');
-  const [showSbModal, setShowSbModal] = useState(false);
-  const [shareLink, setShareLink] = useState('');
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [pendingIn, setPendingIn] = useState({});
   const showToast = m => {
     setToast(m);
     setTimeout(() => setToast(null), 2400);
@@ -1660,7 +1653,6 @@ function App() {
       const list = c || [];
       setClients(list);
       setLoading(false);
-      fetchPendingCheckins(list);
     });
   }, []);
   const cData = id => allData[id] || {};
@@ -1718,14 +1710,6 @@ function App() {
   async function openClient(client) {
     setCur(client);
     await ensureLoaded(client);
-    const sbData = await fetchSupabaseCheckins(client);
-    if (sbData) {
-      if (!allData[client.id]) allData[client.id] = {};
-      Object.assign(allData[client.id], sbData);
-      setAllData({
-        ...allData
-      });
-    }
     setView("log");
   }
   async function finishFlow() {
@@ -1830,69 +1814,6 @@ function App() {
     } catch (e) {
       alert("Could not restore backup: " + e.message);
     }
-  }
-  async function fetchPendingCheckins(clientList) {
-    const url = localStorage.getItem('p52_sb_url');
-    const key = localStorage.getItem('p52_sb_key');
-    if (!url || !key || !clientList.length) return;
-    try {
-      const ids = clientList.map(c => "client_id.eq." + c.id).join(',');
-      const r = await fetch(`${url}/rest/v1/checkins?or=(${ids})&select=client_id,week_number`, {
-        headers: {
-          'apikey': key,
-          'Authorization': 'Bearer ' + key
-        }
-      });
-      const data = await r.json();
-      if (!Array.isArray(data)) return;
-      const map = {};
-      data.forEach(row => {
-        if (!map[row.client_id]) map[row.client_id] = new Set();
-        map[row.client_id].add(row.week_number);
-      });
-      setPendingIn(map);
-    } catch (e) {}
-  }
-  async function fetchSupabaseCheckins(client) {
-    const url = localStorage.getItem('p52_sb_url');
-    const key = localStorage.getItem('p52_sb_key');
-    if (!url || !key) return null;
-    try {
-      const r = await fetch(`${url}/rest/v1/checkins?client_id=eq.${encodeURIComponent(client.id)}&order=week_number.asc`, {
-        headers: {
-          'apikey': key,
-          'Authorization': 'Bearer ' + key
-        }
-      });
-      const rows = await r.json();
-      if (!Array.isArray(rows) || !rows.length) return null;
-      const merged = {};
-      rows.forEach(row => {
-        merged[row.week_number] = {
-          ...row.data,
-          _fromClient: true,
-          _submittedAt: row.submitted_at
-        };
-      });
-      return merged;
-    } catch (e) {
-      return null;
-    }
-  }
-  function genShareLink(client) {
-    const url = localStorage.getItem('p52_sb_url');
-    const key = localStorage.getItem('p52_sb_key');
-    if (!url || !key) {
-      showToast("Set up Supabase in Settings first");
-      return null;
-    }
-    const wk = cWeek(client);
-    const ph = gPhase(wk);
-    const msg = localStorage.getItem('p52_week_msg') || '';
-    const encodedMsg = msg ? btoa(unescape(encodeURIComponent(msg))) : '';
-    const base = window.location.href.replace('index.html', '').replace(/\/$/, '');
-    const link = `${base}/checkin.html?c=${encodeURIComponent(client.id)}&n=${encodeURIComponent(client.name)}&w=${wk}&ph=${ph}${encodedMsg ? '&m=' + encodedMsg : ''}&url=${encodeURIComponent(url)}&key=${encodeURIComponent(key)}`;
-    return link;
   }
   async function updateTrackMonth(track, month) {
     const tm = {
@@ -2013,10 +1934,7 @@ function App() {
   }, "Coach Dashboard")), React.createElement("button", {
     onClick: () => {
       setKeyInput(apiKey);
-      setSbUrl(localStorage.getItem('p52_sb_url') || '');
-      setSbKey(localStorage.getItem('p52_sb_key') || '');
-      setWeekMsg(localStorage.getItem('p52_week_msg') || '');
-      setShowSbModal(true);
+      setShowKeyModal(true);
     },
     style: {
       background: "none",
@@ -2237,17 +2155,16 @@ function App() {
     }
   }, "+"), React.createElement(Toast, {
     msg: toast
-  }), showSbModal && React.createElement("div", {
+  }), showKeyModal && React.createElement("div", {
     style: {
       position: "fixed",
       inset: 0,
-      background: "rgba(0,0,0,0.92)",
+      background: "rgba(0,0,0,0.9)",
       zIndex: 500,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: 20,
-      overflowY: "auto"
+      padding: 24
     }
   }, React.createElement("div", {
     style: {
@@ -2256,24 +2173,22 @@ function App() {
       borderRadius: 16,
       padding: 24,
       width: "100%",
-      maxWidth: 420
+      maxWidth: 400
     }
   }, React.createElement("div", {
     style: {
       fontSize: 16,
       fontWeight: 700,
-      marginBottom: 20
-    }
-  }, "Settings"), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#5271FF",
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
       marginBottom: 6
     }
-  }, "Anthropic API Key"), React.createElement("input", {
+  }, "Anthropic API Key"), React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#666",
+      marginBottom: 16,
+      lineHeight: 1.6
+    }
+  }, "Required for AI readiness analysis. Get your key at console.anthropic.com."), React.createElement("input", {
     value: keyInput,
     onChange: e => setKeyInput(e.target.value),
     placeholder: "sk-ant-...",
@@ -2282,174 +2197,21 @@ function App() {
       background: "#222",
       border: "1px solid #333",
       borderRadius: 8,
-      padding: "11px 14px",
-      fontSize: 13,
-      color: "#F0F0F0",
-      width: "100%",
-      outline: "none",
-      marginBottom: 18,
-      fontFamily: "monospace"
-    }
-  }), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#5271FF",
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
-      marginBottom: 4
-    }
-  }, "Supabase Project URL"), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#444",
-      marginBottom: 8
-    }
-  }, "Supabase dashboard \u2192 Settings \u2192 API \u2192 Project URL"), React.createElement("input", {
-    value: sbUrl,
-    onChange: e => setSbUrl(e.target.value),
-    placeholder: "https://xxxx.supabase.co",
-    style: {
-      background: "#222",
-      border: "1px solid #333",
-      borderRadius: 8,
-      padding: "11px 14px",
-      fontSize: 13,
-      color: "#F0F0F0",
-      width: "100%",
-      outline: "none",
-      marginBottom: 16
-    }
-  }), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#5271FF",
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
-      marginBottom: 4
-    }
-  }, "Supabase Anon Key"), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#444",
-      marginBottom: 8
-    }
-  }, "Supabase dashboard \u2192 Settings \u2192 API \u2192 anon public"), React.createElement("input", {
-    value: sbKey,
-    onChange: e => setSbKey(e.target.value),
-    placeholder: "eyJhbGci...",
-    type: "password",
-    style: {
-      background: "#222",
-      border: "1px solid #333",
-      borderRadius: 8,
-      padding: "11px 14px",
-      fontSize: 13,
-      color: "#F0F0F0",
-      width: "100%",
-      outline: "none",
-      marginBottom: 16,
-      fontFamily: "monospace"
-    }
-  }), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#5271FF",
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
-      marginBottom: 4
-    }
-  }, "Weekly Message to Clients"), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#444",
-      marginBottom: 8
-    }
-  }, "Appears at top of every client check-in this week"), React.createElement("textarea", {
-    value: weekMsg,
-    onChange: e => setWeekMsg(e.target.value),
-    placeholder: "e.g. Week 4 is your deload week. Trust the process.",
-    rows: 3,
-    style: {
-      background: "#222",
-      border: "1px solid #333",
-      borderRadius: 8,
-      padding: "11px 14px",
-      fontSize: 13,
-      color: "#F0F0F0",
-      width: "100%",
-      outline: "none",
-      marginBottom: 20,
-      resize: "none",
-      fontFamily: "inherit",
-      lineHeight: 1.6
-    }
-  }), React.createElement("div", {
-    style: {
-      height: 1,
-      background: "#252525",
-      margin: "4px 0 16px"
-    }
-  }), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#5271FF",
-      textTransform: "uppercase",
-      letterSpacing: "0.07em",
-      marginBottom: 10
-    }
-  }, "Data Backup"), React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      marginBottom: 20
-    }
-  }, React.createElement("button", {
-    onClick: () => {
-      setShowSbModal(false);
-      exportData();
-    },
-    style: {
-      ...btnS,
-      flex: 1,
-      padding: 12,
-      fontSize: 14
-    }
-  }, "\u2B07 Export Backup"), React.createElement("label", {
-    style: {
-      ...btnS,
-      flex: 1,
-      padding: 12,
+      padding: "12px 14px",
       fontSize: 14,
-      textAlign: "center",
-      cursor: "pointer",
-      borderRadius: 14,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
+      color: "#F0F0F0",
+      width: "100%",
+      outline: "none",
+      marginBottom: 14,
+      fontFamily: "monospace"
     }
-  }, "\u2B06 Import Backup", React.createElement("input", {
-    type: "file",
-    accept: ".json",
-    style: {
-      display: "none"
-    },
-    onChange: e => {
-      if (e.target.files[0]) {
-        setShowSbModal(false);
-        importData(e.target.files[0]);
-      }
-    }
-  }))), React.createElement("div", {
+  }), React.createElement("div", {
     style: {
       display: "flex",
       gap: 10
     }
   }, React.createElement("button", {
-    onClick: () => setShowSbModal(false),
+    onClick: () => setShowKeyModal(false),
     style: {
       ...btnS,
       flex: 1,
@@ -2458,14 +2220,11 @@ function App() {
     }
   }, "Cancel"), React.createElement("button", {
     onClick: () => {
-      localStorage.setItem('p52_apikey', keyInput.trim());
-      setApiKey(keyInput.trim());
-      localStorage.setItem('p52_sb_url', sbUrl.trim());
-      localStorage.setItem('p52_sb_key', sbKey.trim());
-      localStorage.setItem('p52_week_msg', weekMsg.trim());
-      setShowSbModal(false);
-      showToast("Settings saved");
-      fetchPendingCheckins(clients);
+      const k = keyInput.trim();
+      localStorage.setItem('p52_apikey', k);
+      setApiKey(k);
+      setShowKeyModal(false);
+      showToast("Key saved");
     },
     style: {
       ...btnP,
@@ -2473,7 +2232,7 @@ function App() {
       padding: 12,
       fontSize: 14
     }
-  }, "Save Settings")))));
+  }, "Save Key")))));
   if (view === "add") {
     const monthOpts = Array.from({
       length: 12
@@ -3425,19 +3184,6 @@ function App() {
         fontSize: 15
       }
     }, "\uD83D\uDDD1"), React.createElement("button", {
-      onClick: () => {
-        const lnk = genShareLink(cur);
-        if (lnk) {
-          setShareLink(lnk);
-          setShowShareModal(true);
-        }
-      },
-      style: {
-        ...hbtn,
-        marginRight: 4,
-        fontSize: 14
-      }
-    }, "\uD83D\uDCE4"), React.createElement("button", {
       onClick: () => setView("trends"),
       style: {
         ...hbtn,
@@ -4102,96 +3848,7 @@ function App() {
       }
     }, "Select a month or phase above to generate a compliance report"))), React.createElement(Toast, {
       msg: toast
-    }), showShareModal && React.createElement("div", {
-      style: {
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.92)",
-        zIndex: 500,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20
-      }
-    }, React.createElement("div", {
-      style: {
-        background: "#181818",
-        border: "1px solid #2C2C2C",
-        borderRadius: 16,
-        padding: 24,
-        width: "100%",
-        maxWidth: 420
-      }
-    }, React.createElement("div", {
-      style: {
-        fontSize: 16,
-        fontWeight: 700,
-        marginBottom: 4
-      }
-    }, "Share Check-In"), React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "#666",
-        marginBottom: 14
-      }
-    }, cur && cur.name, " \u2014 Week ", cur && cWeek(cur)), React.createElement("div", {
-      style: {
-        background: "#111",
-        border: "1px solid #252525",
-        borderRadius: 8,
-        padding: "11px 14px",
-        fontSize: 11,
-        color: "#8CA4FF",
-        fontFamily: "monospace",
-        wordBreak: "break-all",
-        marginBottom: 16,
-        lineHeight: 1.6,
-        maxHeight: 120,
-        overflowY: "auto"
-      }
-    }, shareLink), React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 10
-      }
-    }, React.createElement("button", {
-      onClick: () => {
-        navigator.clipboard.writeText(shareLink);
-        showToast("Link copied!");
-      },
-      style: {
-        ...btnP,
-        padding: 13,
-        fontSize: 14
-      }
-    }, "Copy Link"), React.createElement("button", {
-      onClick: () => {
-        window.open("https://wa.me/?text=" + encodeURIComponent("Your PATH52 check-in: " + shareLink));
-      },
-      style: {
-        ...btnS,
-        padding: 13,
-        fontSize: 14
-      }
-    }, "Send via WhatsApp"), React.createElement("button", {
-      onClick: () => {
-        window.open("sms:?body=" + encodeURIComponent("Your PATH52 check-in: " + shareLink));
-      },
-      style: {
-        ...btnS,
-        padding: 13,
-        fontSize: 14
-      }
-    }, "Send via Text"), React.createElement("button", {
-      onClick: () => setShowShareModal(false),
-      style: {
-        ...btnS,
-        padding: 13,
-        fontSize: 14,
-        color: "#555"
-      }
-    }, "Close")))));
+    }));
   }
   if (view === "trends") {
     if (!cur) return null;
