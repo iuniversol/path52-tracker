@@ -674,35 +674,35 @@ function nutrSteps(week) {
     return [{
       id: "proteinDays",
       type: "days",
-      q: ["Protein at every", "meal this week?"],
+      q: ["How many days did you", "hit your protein target?"],
       hint: "Goal: 5+ of 7 days — 1 palm per meal, every meal",
       logLabel: "Protein days",
       icon: "🥩"
     }, {
       id: "vegetableDays",
       type: "days",
-      q: ["Vegetables at 2+", "meals daily?"],
-      hint: "Half the plate non-starchy vegetables — this is your micronutrient foundation",
-      logLabel: "Vegetable days",
+      q: ["Fruits & vegetables —", "how many days at 2+ meals?"],
+      hint: "Half the plate — non-starchy veggies + any fruit. This is your micronutrient foundation.",
+      logLabel: "Fruit & veg days",
       icon: "🥦"
     }, {
       id: "waterDays",
       type: "days",
-      q: ["Water target hit?"],
-      hint: "Bodyweight in lbs ÷ 2 = daily oz target",
+      q: ["How many days did you", "hit your water goal?"],
+      hint: "Bodyweight in lbs ÷ 2 = your daily oz target",
       logLabel: "Water days",
       icon: "💧"
     }, {
       id: "multivitaminDays",
       type: "days",
-      q: ["Multivitamin taken", "daily?"],
+      q: ["How many days did you", "take your multivitamin?"],
       hint: "AM + PM dose — foundational from Week 1",
       logLabel: "Multivitamin",
       icon: "🌿"
     }, {
       id: "foodQuality",
       type: "choice3",
-      q: ["Whole food quality", "this week?"],
+      q: ["How would you rate your", "food quality this week?"],
       options: [{
         v: "Whole foods first",
         l: "Whole foods first",
@@ -726,21 +726,21 @@ function nutrSteps(week) {
   if (ph === 2) return [{
     id: "proteinDays",
     type: "days",
-    q: ["Protein (2.0–2.2g/kg)", "target hit?"],
+    q: ["How many days did you hit", "your protein target (2.0–2.2g/kg)?"],
     hint: "Phase 2 protein target — first time tracking the specific amount",
     logLabel: "Protein days",
     icon: "🥩"
   }, {
     id: "vegetableDays",
     type: "days",
-    q: ["Vegetables + whole foods", "still consistent?"],
+    q: ["Fruits & vegetables — how many", "days at 2+ meals?"],
     hint: "Micronutrient density carries forward from Phase 1 — do not let this slip",
     logLabel: "Vegetable days",
     icon: "🥦"
   }, {
     id: "carbTiming",
     type: "choice3",
-    q: ["Carbs timed around", "training sessions?"],
+    q: ["How many days did you time", "carbs around your training?"],
     options: [{
       v: "Yes — intentional",
       l: "Yes — intentional",
@@ -762,7 +762,7 @@ function nutrSteps(week) {
   }, {
     id: "creatine",
     type: "choice3",
-    q: ["Creatine 5g daily?"],
+    q: ["How consistent were you", "with your daily creatine (5g)?"],
     options: [{
       v: "Every day",
       l: "Every day",
@@ -784,7 +784,7 @@ function nutrSteps(week) {
   }, {
     id: "multivitaminDays",
     type: "days",
-    q: ["Multivitamin taken", "daily?"],
+    q: ["How many days did you", "take your multivitamin?"],
     hint: "AM + PM dose — consistent from Phase 1",
     logLabel: "Multivitamin",
     icon: "🌿"
@@ -792,7 +792,7 @@ function nutrSteps(week) {
   if (ph === 3) return [{
     id: "caloricSurplus",
     type: "choice3",
-    q: ["In caloric surplus?"],
+    q: ["Are you eating in a", "caloric surplus this week?"],
     options: [{
       v: "On target",
       l: "On target +300–500",
@@ -814,14 +814,14 @@ function nutrSteps(week) {
   }, {
     id: "proteinDays",
     type: "days",
-    q: ["Protein ceiling", "(2.2–2.4g/kg) hit?"],
+    q: ["How many days did you hit", "your protein ceiling (2.2–2.4g/kg)?"],
     hint: "Upper protein range for hypertrophy — every missed day limits muscle growth",
     logLabel: "Protein ceiling",
     icon: "🥩"
   }, {
     id: "foodQuality",
     type: "choice3",
-    q: ["Food quality", "in surplus?"],
+    q: ["How would you rate your", "food quality while in surplus?"],
     options: [{
       v: "High quality",
       l: "High quality",
@@ -843,7 +843,7 @@ function nutrSteps(week) {
   }, {
     id: "macroTracking",
     type: "choice3",
-    q: ["Macro tracking", "adherence?"],
+    q: ["How consistent was your", "macro tracking this week?"],
     options: [{
       v: "Full tracking",
       l: "Full tracking",
@@ -865,7 +865,7 @@ function nutrSteps(week) {
   }, {
     id: "multivitaminDays",
     type: "days",
-    q: ["Multivitamin taken", "daily?"],
+    q: ["How many days did you", "take your multivitamin?"],
     hint: "AM + PM dose — supports enzymatic function during peak volume",
     logLabel: "Multivitamin",
     icon: "🌿"
@@ -873,7 +873,7 @@ function nutrSteps(week) {
   return [{
     id: "foodAutonomy",
     type: "choice3",
-    q: ["Food decisions without", "tracking?"],
+    q: ["Are you making food decisions", "without needing to track?"],
     options: [{
       v: "Fully autonomous",
       l: "Fully autonomous",
@@ -895,14 +895,14 @@ function nutrSteps(week) {
   }, {
     id: "vegetableDays",
     type: "days",
-    q: ["Vegetables + whole foods", "still consistent?"],
+    q: ["Fruits & vegetables — how many", "days at 2+ meals?"],
     hint: "Autonomy means micronutrient density is intuitive — not abandoned. This habit never stops.",
     logLabel: "Micronutrient quality",
     icon: "🥦"
   }, {
     id: "eatingOut",
     type: "choice3",
-    q: ["Eating out with", "structure (PLATE method)?"],
+    q: ["When eating out, did you", "use the PLATE method?"],
     options: [{
       v: "Yes — structured",
       l: "Yes — structured",
@@ -924,7 +924,7 @@ function nutrSteps(week) {
   }, {
     id: "phaseNutrition",
     type: "choice3",
-    q: ["Phase-appropriate", "fueling?"],
+    q: ["How well did your nutrition", "align with Phase 4 demands?"],
     options: [{
       v: "On target",
       l: "On target",
@@ -946,7 +946,7 @@ function nutrSteps(week) {
   }, {
     id: "multivitaminDays",
     type: "days",
-    q: ["Multivitamin taken", "daily?"],
+    q: ["How many days did you", "take your multivitamin?"],
     hint: "AM + PM dose — a foundational habit that carries through all 52 weeks",
     logLabel: "Multivitamin",
     icon: "🌿"
@@ -955,7 +955,7 @@ function nutrSteps(week) {
 const RECOV_CTX = {
   1: {
     type: "choice3",
-    q: ["Myofascial release + breathwork", "this week?"],
+    q: ["How many days did you do", "myofascial release + breathwork?"],
     options: [{
       v: "Daily",
       l: "Daily",
@@ -977,21 +977,21 @@ const RECOV_CTX = {
   },
   2: {
     type: "counter",
-    q: ["Cold exposure", "sessions this week?"],
+    q: ["On average, how many", "cold exposure sessions this week?"],
     max: 7,
     logLabel: "Cold exposure",
     icon: "❄️"
   },
   3: {
     type: "counter",
-    q: ["Sauna sessions", "this week?"],
+    q: ["On average, how many", "sauna sessions this week?"],
     max: 7,
     logLabel: "Sauna sessions",
     icon: "🧖"
   },
   4: {
     type: "choice3",
-    q: ["Recovery fully", "self-directed?"],
+    q: ["Is your recovery", "fully self-directed?"],
     options: [{
       v: "Yes",
       l: "Fully self-directed",
@@ -1035,7 +1035,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "RESISTANCE",
     icon: "💪",
     contextLabel: rc.label,
-    q: ["How many strength", "sessions this week?"],
+    q: ["Strength sessions", "completed this week?"],
     type: "sessions",
     logLabel: "Strength sessions"
   }, {
@@ -1052,7 +1052,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "CARDIO — " + cc.label,
     icon: "🫁",
     contextLabel: cc.label,
-    q: ["Zone 2 / aerobic", "sessions this week?"],
+    q: ["Cardio sessions", "completed this week?"],
     type: "counter",
     min: 0,
     max: 7,
@@ -1076,7 +1076,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "RECOVERY",
     icon: "🌙",
     contextLabel: ph === 1 ? "Target 7.5+ hrs" : ph === 3 ? "Target 8–9 hrs" : "Target 8+ hrs",
-    q: ["Hours of sleep", "per night?"],
+    q: ["On average, how many hours", "did you sleep each night?"],
     type: "sleep",
     logLabel: "Sleep"
   }, {
@@ -1084,7 +1084,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "RECOVERY",
     icon: "⚡",
     contextLabel: "Rate overall physical + mental energy",
-    q: ["Energy level", "this week?"],
+    q: ["How would you rate your", "energy levels this week?"],
     type: "energy",
     logLabel: "Energy"
   }, {
@@ -1105,7 +1105,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "BODY COMP",
     icon: "⚖️",
     contextLabel: "Optional — morning, post-bathroom",
-    q: ["Current body weight?"],
+    q: ["What is your current", "body weight?"],
     type: "number",
     unit: "lbs",
     decimal: true,
@@ -1120,7 +1120,7 @@ function buildSteps(week, trackMonths = {}) {
     track: "NOTES",
     icon: "📝",
     contextLabel: "Flags, wins, injuries, anything relevant",
-    q: ["Anything to flag", "or note?"],
+    q: ["Any wins, struggles,", "or notes for your coach?"],
     type: "notes",
     optional: true,
     logLabel: "Notes"
